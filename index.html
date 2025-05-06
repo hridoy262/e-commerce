@@ -1,86 +1,195 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-* {
-  box-sizing: border-box;
+<?php
+ include'header.php';
+ include'lib/connection.php';
+
+ $sql = "SELECT * FROM product";
+ $result = $conn -> query ($sql);
+
+ if(isset($_POST['add_to_cart'])){
+
+if(isset($_SESSION['auth']))
+{
+   if($_SESSION['auth']!=1)
+   {
+       header("location:login.php");
+   }
 }
-.menu {
-  float: left;
-  width: 20%;
+else
+{
+   header("location:login.php");
 }
-.menuitem {
-  padding: 8px;
-  margin-top: 7px;
-  border-bottom: 1px solid #f1f1f1;
-}
-.main {
-  float: left;
-  width: 60%;
-  padding: 0 20px;
-  overflow: hidden;
-}
-.right {
-  background-color: lightblue;
-  float: left;
-  width: 20%;
-  padding: 10px 15px;
-  margin-top: 7px;
+  $user_id=$_POST['user_id'];;
+  $product_name = $_POST['product_name'];
+  $product_price = $_POST['product_price'];
+  $product_id = $_POST['product_id'];
+  $product_quantity = 1;
+
+  $select_cart = mysqli_query($conn, "SELECT * FROM `cart` WHERE productid = '$product_id'  && userid='$user_id'");
+
+  if(mysqli_num_rows($select_cart) > 0){
+    echo $message[] = 'product already added to cart';
+
+  }else{
+     $insert_product = mysqli_query($conn, "INSERT INTO `cart`(userid, productid, name, quantity, price) VALUES('$user_id', '$product_id', '$product_name', '$product_quantity', '$product_price')");
+   echo $message[] = 'product added to cart succesfully';
+   header('location:index.php');
+  }
+
 }
 
-@media only screen and (max-width:800px) {
-  /* For tablets: */
-  .main {
-    width: 80%;
-    padding: 0;
-  }
-  .right {
-    width: 100%;
-  }
-}
-@media only screen and (max-width:500px) {
-  /* For mobile phones: */
-  .menu, .main, .right {
-    width: 100%;
-  }
-}
-</style>
-</head>
-<body style="font-family:Verdana;">
+?>
 
-<div style="background-color:#f1f1f1;padding:15px;">
-  <h1>Cinque Terre</h1>
-  <h3>Resize the browser window</h3>
-</div>
 
-<div style="overflow:auto">
-  <div class="menu">
-    <div class="menuitem">The Walk</div>
-    <div class="menuitem">Transport</div>
-    <div class="menuitem">History</div>
-    <div class="menuitem">Gallery</div>
+
+<!--banner-->
+
+<div class="banner">
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+    
+        <div class="banner-text">
+          <p class="bt1">Welcome To</p>
+          <p class="bt2"><span class="bt3">Pikolo</span>Store</p>
+          <p class="bt4">Online Shopping BD has never been easier. </p>
+          
+        </div>
+  
+      
+    </div>
+    
+  <div class="col-md-6">
+    
+      <img src="img/bannerrr.png" class="img-fluid">
+ 
   </div>
 
-  <div class="main">
-    <h2>The Walk</h2>
-    <p>The walk from Monterosso to Riomaggiore will take you approximately two hours, give or take an hour depending on the weather conditions and your physical shape.</p>
-    <img src="img_5terre.jpg" style="width:100%">
-  </div>
-
-  <div class="right">
-    <h2>What?</h2>
-    <p>Cinque Terre comprises five villages: Monterosso, Vernazza, Corniglia, Manarola, and Riomaggiore.</p>
-    <h2>Where?</h2>
-    <p>On the northwest cost of the Italian Riviera, north of the city La Spezia.</p>
-    <h2>Price?</h2>
-    <p>The Walk is free!</p>
   </div>
 </div>
+</div>
+
+<!--banner-->
 
 
-<div style="background-color:#f1f1f1;text-align:center;padding:10px;margin-top:7px;font-size:12px;"> This web page is a part of a demonstration of fluid web design made by w3schools.com. Resize the browser window to see the content respond to the resizing.</div>
+<!---top sell ---->
 
-</body>
-</html>
+<section>
+  <div class="container">
+    <div class="topsell-head">
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <img src="img/mark.png">
+          <h4>All Products</h4>
+          <p>You Can Find Our Products Here</p>
+
+        </div>
+        
+        
+      </div>
+
+    </div>
+  </div>
+  <div class="container">
+  <div class="row">
+  <?php
+          if (mysqli_num_rows($result) > 0) {
+       
+            while($row = mysqli_fetch_assoc($result)) {
+              ?>
+          <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+            <div style="text-align: center; border-radius: 10px; max-width: 100%; padding: 10px;margin-left: 30px;
+  margin-right: 30px;" >
+              <div class="productimg">
+                <img src="admin/product_img/<?php echo $row['imgname']; ?>" >
+              </div>
+              <div>
+              <div>
+                <h6><?php echo $row["name"] ?></h6> 
+                <span><?php echo "&#2547; ", $row["Price"] ?></span> 
+                <input type="hidden" name="user_id" value="<?php echo $_SESSION['userid'];?>" >
+                <input type="hidden" name="product_id" value="<?php echo $row['id']; ?>"> 
+                <input type="hidden" name="product_name" value="<?php echo $row['name']; ?>">
+                <input type="hidden" name="product_catagory" value="<?php echo $row['catagory']; ?>">
+                <input type="hidden" name="product_price" value="<?php echo  $row['Price']; ?>">              
+              </div>
+
+              <input type="submit" class="btn btn btn-primary" value="Add to Cart" name="add_to_cart">
+              </div>
+              
+            </div>
+            </form>
+            <?php 
+    }
+        } 
+        else 
+            echo "0 results";
+        ?>
+
+            
+          </div>
+  </div>
+</section>
+
+
+<!---top sell end---->
+
+
+
+<div class="welcome">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 col-lg-6 col-sm-12">
+      <img src="img/titleline.png" class="titleline">
+        <img src="img/titleful.png">
+        <img src="img/titleline.png" class="titleline">
+        <div>
+        <span class="welcometitle">Welcome to Our Online WebSite</span></div>
+        <div class="row" id="wel1">
+          <div class="col-md-2 col-lg-2 col-2">
+            <img src="img/w1.png" class="w" class="img-fluid">
+          </div>
+
+          <div class="col-md-10  col-lg-10 col-10">
+            <h6 class="wh">24x7 online free support</h6>
+            <p class="wp">There are many variations of passages Lorem Ipsum available<br>
+            but they are many variations </p>
+          </div>   
+        </div>
+
+         <div class="row" id="wel2">
+          <div class="col-md-2 col-lg-2 col-2">
+            <img src="img/w1.png" class="w" class="img-fluid">
+          </div>
+          <div class="col-md-10  col-lg-10 col-10">
+            <h6 class="wh">24x7 online User support</h6>
+            <p class="wp">There are many variations of passages Lorem Ipsum available<br>
+            but they are many variations </p>
+          </div>   
+        </div>
+
+        <div class="row" id="wel2">
+          <div class="col-md-2 col-lg-2 col-2">
+            <img src="img/w1.png" class="w" class="img-fluid">
+          </div>
+          <div class="col-md-10  col-lg-10 col-10">
+            <h6 class="wh">24x7 online Call support</h6>
+            <p class="wp">There are many variations of passages Lorem Ipsum available<br>
+            but they are many variations </p>
+          </div>   
+        </div>
+
+      </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<?php
+ include'footer.php';
+?>
 
